@@ -5,15 +5,10 @@ import { Todo } from './Todo'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-
-interface TodoItem {
-  id: number
-  text: string
-  completed: boolean
-}
+import { Todo as TodoType, CreateTodoInput, UpdateTodoInput, DeleteTodoInput } from '@/types/todo'
 
 export function TodoList() {
-  const [todos, setTodos] = useState<TodoItem[]>([])
+  const [todos, setTodos] = useState<TodoType[]>([])
   const [newTodo, setNewTodo] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
@@ -29,7 +24,7 @@ export function TodoList() {
       if (!response.ok) {
         throw new Error('Failed to fetch todos')
       }
-      const data = await response.json()
+      const data: TodoType[] = await response.json()
       setTodos(data)
     } catch (error) {
       console.error('Failed to fetch todos:', error)
@@ -48,15 +43,16 @@ export function TodoList() {
     if (newTodo.trim() === '') return
     setIsLoading(true)
     try {
+      const createTodoInput: CreateTodoInput = { text: newTodo }
       const response = await fetch('/api/todos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: newTodo })
+        body: JSON.stringify(createTodoInput)
       })
       if (!response.ok) {
         throw new Error('Failed to add todo')
       }
-      const data = await response.json()
+      const data: TodoType = await response.json()
       setTodos([...todos, data])
       setNewTodo('')
       toast({
@@ -77,15 +73,16 @@ export function TodoList() {
 
   const updateTodo = async (id: number, text: string, completed: boolean) => {
     try {
+      const updateTodoInput: UpdateTodoInput = { id, text, completed }
       const response = await fetch('/api/todos', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, text, completed })
+        body: JSON.stringify(updateTodoInput)
       })
       if (!response.ok) {
         throw new Error('Failed to update todo')
       }
-      const data = await response.json()
+      const data: TodoType = await response.json()
       setTodos(todos.map(todo => todo.id === id ? data : todo))
       toast({
         title: "Success",
@@ -103,10 +100,11 @@ export function TodoList() {
 
   const deleteTodo = async (id: number) => {
     try {
+      const deleteTodoInput: DeleteTodoInput = { id }
       const response = await fetch('/api/todos', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
+        body: JSON.stringify(deleteTodoInput)
       })
       if (!response.ok) {
         throw new Error('Failed to delete todo')
@@ -131,35 +129,35 @@ export function TodoList() {
   }
 
   return (
-    <div className="max-w-md mx-auto">
-      <form onSubmit={addTodo} className="flex space-x-2 mb-4">
-        <Input
-          type="text"
-          value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
-          placeholder="Add a new todo"
-          className="flex-grow"
-        />
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Adding...' : 'Add Todo'}
-        </Button>
-      </form>
-      <div className="space-y-2">
-        {todos.map(todo => (
-          <Todo
-            key={todo.id}
-            id={todo.id}
-            text={todo.text}
-            completed={todo.completed}
-            onUpdate={updateTodo}
-            onDelete={deleteTodo}
+      <div className="max-w-md mx-auto">
+        <form onSubmit={addTodo} className="flex space-x-2 mb-4">
+          <Input
+              type="text"
+              value={newTodo}
+              onChange={(e) => setNewTodo(e.target.value)}
+              placeholder="Add a new todo"
+              className="flex-grow"
           />
-        ))}
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? 'Adding...' : 'Add Todo'}
+          </Button>
+        </form>
+        <div className="space-y-2">
+          {todos.map(todo => (
+              <Todo
+                  key={todo.id}
+                  id={todo.id}
+                  text={todo.text}
+                  completed={todo.completed}
+                  onUpdate={updateTodo}
+                  onDelete={deleteTodo}
+              />
+          ))}
+        </div>
+        {todos.length === 0 && (
+            <p className="text-center text-gray-500">No todos yet. Add one above!</p>
+        )}
       </div>
-      {todos.length === 0 && (
-        <p className="text-center text-gray-500">No todos yet. Add one above!</p>
-      )}
-    </div>
   )
 }
 

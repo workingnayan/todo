@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server'
 import fs from 'fs/promises'
 import path from 'path'
+import { Todo, CreateTodoInput, UpdateTodoInput, DeleteTodoInput } from '@/types/todo'
 
 const todosPath = path.join(process.cwd(), 'data', 'todos.json')
 
-async function getTodos() {
+async function getTodos(): Promise<Todo[]> {
   const data = await fs.readFile(todosPath, 'utf8')
   return JSON.parse(data)
 }
 
-async function saveTodos(todos: any[]) {
+async function saveTodos(todos: Todo[]): Promise<void> {
   await fs.writeFile(todosPath, JSON.stringify(todos, null, 2))
 }
 
@@ -25,9 +26,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { text } = await request.json()
+    const { text }: CreateTodoInput = await request.json()
     const todos = await getTodos()
-    const newTodo = { id: Date.now(), text, completed: false }
+    const newTodo: Todo = { id: Date.now(), text, completed: false }
     todos.push(newTodo)
     await saveTodos(todos)
     return NextResponse.json(newTodo, { status: 201 })
@@ -39,9 +40,9 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const { id, text, completed } = await request.json()
+    const { id, text, completed }: UpdateTodoInput = await request.json()
     const todos = await getTodos()
-    const todoIndex = todos.findIndex((t: any) => t.id === id)
+    const todoIndex = todos.findIndex((t: Todo) => t.id === id)
     if (todoIndex === -1) {
       return NextResponse.json({ error: 'Todo not found' }, { status: 404 })
     }
@@ -56,9 +57,9 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const { id } = await request.json()
+    const { id }: DeleteTodoInput = await request.json()
     const todos = await getTodos()
-    const updatedTodos = todos.filter((t: any) => t.id !== id)
+    const updatedTodos = todos.filter((t: Todo) => t.id !== id)
     if (updatedTodos.length === todos.length) {
       return NextResponse.json({ error: 'Todo not found' }, { status: 404 })
     }

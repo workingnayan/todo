@@ -15,39 +15,15 @@ type ToasterToast = ToastProps & {
   action?: ToastActionElement
 }
 
-const actionTypes = {
-  ADD_TOAST: "ADD_TOAST",
-  UPDATE_TOAST: "UPDATE_TOAST",
-  DISMISS_TOAST: "DISMISS_TOAST",
-  REMOVE_TOAST: "REMOVE_TOAST",
-} as const
+// Removed actionTypes object
 
-let count = 0
+type ActionType =
+    | { type: "ADD_TOAST"; toast: ToasterToast }
+    | { type: "UPDATE_TOAST"; toast: Partial<ToasterToast> }
+    | { type: "DISMISS_TOAST"; toastId?: string }
+    | { type: "REMOVE_TOAST"; toastId?: string }
 
-function genId() {
-  count = (count + 1) % Number.MAX_VALUE
-  return count.toString()
-}
-
-type ActionType = typeof actionTypes
-
-type Action =
-  | {
-      type: ActionType["ADD_TOAST"]
-      toast: ToasterToast
-    }
-  | {
-      type: ActionType["UPDATE_TOAST"]
-      toast: Partial<ToasterToast>
-    }
-  | {
-      type: ActionType["DISMISS_TOAST"]
-      toastId?: ToasterToast["id"]
-    }
-  | {
-      type: ActionType["REMOVE_TOAST"]
-      toastId?: ToasterToast["id"]
-    }
+type Action = ActionType
 
 interface State {
   toasts: ToasterToast[]
@@ -83,7 +59,7 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         toasts: state.toasts.map((t) =>
-          t.id === action.toast.id ? { ...t, ...action.toast } : t
+            t.id === action.toast.id ? { ...t, ...action.toast } : t
         ),
       }
 
@@ -103,12 +79,12 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         toasts: state.toasts.map((t) =>
-          t.id === toastId || toastId === undefined
-            ? {
-                ...t,
-                open: false,
-              }
-            : t
+            t.id === toastId || toastId === undefined
+                ? {
+                  ...t,
+                  open: false,
+                }
+                : t
         ),
       }
     }
@@ -140,13 +116,13 @@ function dispatch(action: Action) {
 type Toast = Omit<ToasterToast, "id">
 
 function toast({ ...props }: Toast) {
-  const id = genId()
+  const id = Math.random().toString(36).substr(2, 9)
 
   const update = (props: ToasterToast) =>
-    dispatch({
-      type: "UPDATE_TOAST",
-      toast: { ...props, id },
-    })
+      dispatch({
+        type: "UPDATE_TOAST",
+        toast: { ...props, id },
+      })
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
   dispatch({
@@ -189,3 +165,4 @@ function useToast() {
 }
 
 export { useToast, toast }
+

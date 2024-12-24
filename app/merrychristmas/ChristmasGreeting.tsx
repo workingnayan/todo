@@ -5,15 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Plus, Minus } from 'lucide-react'
-
-interface Greeting {
-    id: number;
-    name: string;
-}
+import { ChristmasGreeting as ChristmasGreetingType } from '@/types/christmas-greeting'
 
 export function ChristmasGreeting() {
-    const [names, setNames] = useState(['', ''])
-    const [greetings, setGreetings] = useState<Greeting[]>([])
+    const [names, setNames] = useState<string[]>(['', ''])
+    const [greetings, setGreetings] = useState<ChristmasGreetingType[]>([])
     const [showGreetings, setShowGreetings] = useState(false)
 
     const handleNameChange = (index: number, value: string) => {
@@ -37,7 +33,7 @@ export function ChristmasGreeting() {
         e.preventDefault()
         const validNames = names.filter(name => name.trim() !== '')
         if (validNames.length > 0) {
-            const newGreetings = validNames.map(name => ({
+            const newGreetings: ChristmasGreetingType[] = validNames.map(name => ({
                 id: Date.now() + Math.random(),
                 name: name.trim()
             }))
