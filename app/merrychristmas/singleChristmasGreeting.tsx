@@ -1,21 +1,41 @@
 'use client'
 
-import { useState } from 'react'
+import {useState, useEffect, Suspense} from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { useSearchParams } from "next/navigation";
 
-export function SingleChristmasGreeting() {
+export function SingleChristmasGreeting(){
+    return (
+        <Suspense fallback={<div> Loading ...</div>}>
+            <FetchSingleChristmasGreeting />
+        </Suspense>
+    )
+}
+export function FetchSingleChristmasGreeting() {
     const [name, setName] = useState<string>('')
     const [showGreeting, setShowGreeting] = useState(false)
+    const searchParams = useSearchParams()
+
+    useEffect(() => {
+        const fetchedName = searchParams.get("name")
+        if(fetchedName){
+            console.log('fetched Name from url ---', fetchedName)
+            setName(searchParams.get('name') || '')
+            setShowGreeting(true)
+        }
+
+    }, [searchParams])
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         if (name) {
+            console.log('submitted name ---', name)
             setShowGreeting(true)
         }
     }
-    //
+
     const resetForm = () => {
         setName('')
         setShowGreeting(false)
@@ -85,7 +105,7 @@ export function SingleChristmasGreeting() {
                         onClick={resetForm}
                         className="mt-6 bg-green-600 hover:bg-green-700 text-white w-full"
                     >
-                        Back
+                        Wish Someone else? Click me!!
                     </Button>
                 </div>
             )}
