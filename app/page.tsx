@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import MerryChristmasPage from "@/app/merrychristmas/page";
+import NewYearPage from "@/app/newyear/page";
 
 export default function Home() {
+    return <NewYearPage />;
     return <MerryChristmasPage />
     return (
         <main className="flex min-h-screen flex-col items-center justify-center p-24">
